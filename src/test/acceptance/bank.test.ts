@@ -7,7 +7,8 @@ jest.mock("../../main/date", () => ({
   createDate: jest.fn(),
 }));
 
-const setDate = (date: string) => {
+const setDate = (dateStr: string) => {
+  const date = new Date(dateStr);
   (createDate as jest.Mock).mockReturnValue(date);
 };
 
@@ -17,23 +18,34 @@ describe("Given a client makes a deposit of 1000 on 10-01-2012", () => {
       describe("When they print their bank statement", () => {
         it("will print the bank statement", () => {
           const service = new AccountService();
-          //10-01-2012
-          setDate("10-01-2012");
+
+          setDate("2012-01-10");
           service.deposit(1000);
-          //13-01-2012
-          setDate("13-01-2012");
+
+          setDate("2012-01-13");
           service.deposit(2000);
-          //14-01-2012
-          setDate("14-01-2012");
+
+          setDate("2012-01-14");
           service.withdraw(500);
+
           service.printStatement();
 
-          expect(printer).toHaveBeenCalledWith(`
-                        Date || Amount || Balance
-                        14/01/2012 || -500   || 2500
-                        13/01/2012 || 2000   || 3000
-                        10/01/2012 || 1000   || 1000
-                    `);
+
+          // const expected = [
+          //     `Date       || Amount || Balance`,
+          //     `14/01/2012 || -500   || 2500`,
+          //     `13/01/2012 || 2000   || 3000`,
+          //     `10/01/2012 || 1000   || 1000`
+          // ];
+
+          const expected = ` 
+            Date       || Amount || Balance
+            14/01/2012 || -500   || 2500
+            13/01/2012 || 2000   || 3000
+            10/01/2012 || 1000   || 1000
+          `;
+
+          expect(printer).toHaveBeenCalledWith(expected);
         });
       });
     });
